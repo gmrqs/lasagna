@@ -1,5 +1,4 @@
 services:
-
   minio:
     image: minio/minio
     ports:
@@ -12,9 +11,17 @@ services:
       - default
     environment:
       - MINIO_ROOT_USER=admin
-      - MINIO_ROOT_PASSWORD=admin123
+      - MINIO_ROOT_PASSWORD=password
     command: server /data --console-address ":9090"
-
+  mc:
+    depends_on:
+      - minio
+    image: minio/mc
+    container_name: mc
+    environment:
+      - AWS_ACCESS_KEY_ID=admin
+      - AWS_SECRET_ACCESS_KEY=password
+      - AWS_REGION=us-east-1
   postgres:
     image: postgres:14.2-alpine
     ports:
@@ -29,7 +36,6 @@ services:
       - .gitignore/postgres/data:/var/lib/postgresql/data
     networks:
       - default
-
   hive-metastore:
     image: hive-metastore
     ports:
@@ -39,7 +45,6 @@ services:
     restart: always
     networks:
       - default
-  
   spark-master:
     image: pyspark
     ports:
@@ -53,7 +58,6 @@ services:
       - MINIO_ROOT_PASSWORD=admin123
       - SPARK_LOCAL_IP=spark-master
     command: usr/local/spark/bin/spark-class org.apache.spark.deploy.master.Master --ip spark-master --port 7077 --webui-port 5050
-  
   spark-worker-a:
     image: pyspark
     networks:
@@ -67,7 +71,6 @@ services:
       - MINIO_ROOT_PASSWORD=admin123
       - SPARK_LOCAL_IP=spark-worker-a
     command: usr/local/spark/bin/spark-class org.apache.spark.deploy.worker.Worker --webui-port 5051 spark://spark-master:7077
-  
   spark-worker-b:
     image: pyspark
     networks:
@@ -81,7 +84,6 @@ services:
       - MINIO_ROOT_PASSWORD=admin123
       - SPARK_LOCAL_IP=spark-worker-b
     command: usr/local/spark/bin/spark-class org.apache.spark.deploy.worker.Worker --webui-port 5052 spark://spark-master:7077
-
   workspace:
     image: jupyter
     networks:
@@ -98,7 +100,6 @@ services:
       - MINIO_ROOT_USER=admin
       - MINIO_ROOT_PASSWORD=admin123
     command: jupyter lab
-
 networks:
     default:
         driver: bridge

@@ -26,6 +26,8 @@ RUN pip3 install jupyterlab
 
 RUN pip3 install pyspark
 
+RUN pip3 install sparksql-magic
+
 ENV SPARK_HOME=/usr/local/lib/python3.10/dist-packages/pyspark
 
 RUN mkdir -p usr/local/spark_dev/work/
