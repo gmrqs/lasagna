@@ -56,8 +56,8 @@ RUN rm /usr/local/delta-hive-assembly_2.11-0.2.0.jar
 
 ENV HADOOP_CLASSPATH=${HADOOP_HOME}/share/hadoop/tools/lib/aws-java-sdk-bundle-1.12.262.jar:${HADOOP_HOME}/share/hadoop/tools/lib/hadoop-aws-3.3.4.jar:${HADOOP_HOME}/share/hadoop/tools/lib/delta-hive-assembly_2.11-0.2.0.jar
 
-COPY metastore-site.xml ${HIVE_HOME}/conf
-COPY entrypoint.sh /entrypoint.sh
+COPY conf/metastore-site.xml ${HIVE_HOME}/conf
+COPY conf/entrypoint.sh /entrypoint.sh
 
 EXPOSE 9083
 
