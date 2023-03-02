@@ -5,8 +5,8 @@ services:
       - "9000:9000"
       - "9090:9090"
     volumes:
-      - .gitignore/minio/data:/data
-      - .gitignore/minio-config:/root/.minio
+      - volumes/minio/data:/data
+      - volumes/minio-config:/root/.minio
     networks:
       - default
     environment:
@@ -24,7 +24,7 @@ services:
     depends_on: 
       - minio
     volumes:
-      - .gitignore/postgres/data:/var/lib/postgresql/data
+      - volumes/postgres/data:/var/lib/postgresql/data
     networks:
       - default
   hive-metastore:
