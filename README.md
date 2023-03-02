@@ -18,7 +18,7 @@ Clique no link _http://127.0.0.1:8888/lab?token=<token_gigante_super_seguro>_
 
 ## O que é criado?
 
-![alt text](analytics-lab.png "Title")
+![alt text](drawio/analytics-lab.png "Title")
 
 O template docker-compose.yml cria uma série de containers, entre eles:
 
