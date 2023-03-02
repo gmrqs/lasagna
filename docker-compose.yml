@@ -13,15 +13,6 @@ services:
       - MINIO_ROOT_USER=admin
       - MINIO_ROOT_PASSWORD=password
     command: server /data --console-address ":9090"
-  mc:
-    depends_on:
-      - minio
-    image: minio/mc
-    container_name: mc
-    environment:
-      - AWS_ACCESS_KEY_ID=admin
-      - AWS_SECRET_ACCESS_KEY=password
-      - AWS_REGION=us-east-1
   postgres:
     image: postgres:14.2-alpine
     ports:
@@ -37,7 +28,7 @@ services:
     networks:
       - default
   hive-metastore:
-    image: hive-metastore
+    build: ./images/hive-metastore
     ports:
       - 9083:9083
     depends_on:
@@ -46,7 +37,7 @@ services:
     networks:
       - default
   spark-master:
-    image: pyspark
+    build: ./images/spark
     ports:
       - "7077:7077"
     networks:
@@ -55,11 +46,11 @@ services:
       - postgres
     environment:
       - MINIO_ROOT_USER=admin
-      - MINIO_ROOT_PASSWORD=admin123
+      - MINIO_ROOT_PASSWORD=password
       - SPARK_LOCAL_IP=spark-master
     command: usr/local/spark/bin/spark-class org.apache.spark.deploy.master.Master --ip spark-master --port 7077 --webui-port 5050
   spark-worker-a:
-    image: pyspark
+    build: ./images/spark
     networks:
       - default
     depends_on:
@@ -68,11 +59,11 @@ services:
       - "5051:5051"
     environment:
       - MINIO_ROOT_USER=admin
-      - MINIO_ROOT_PASSWORD=admin123
+      - MINIO_ROOT_PASSWORD=password
       - SPARK_LOCAL_IP=spark-worker-a
     command: usr/local/spark/bin/spark-class org.apache.spark.deploy.worker.Worker --webui-port 5051 spark://spark-master:7077
   spark-worker-b:
-    image: pyspark
+    build: ./images/spark
     networks:
       - default
     depends_on:
@@ -81,11 +72,11 @@ services:
       - "5052:5052"
     environment:
       - MINIO_ROOT_USER=admin
-      - MINIO_ROOT_PASSWORD=admin123
+      - MINIO_ROOT_PASSWORD=password
       - SPARK_LOCAL_IP=spark-worker-b
     command: usr/local/spark/bin/spark-class org.apache.spark.deploy.worker.Worker --webui-port 5052 spark://spark-master:7077
   workspace:
-    image: jupyter
+    build: ./images/workspace
     networks:
       - default
     depends_on:
@@ -98,7 +89,7 @@ services:
       - ./work:/usr/local/spark_dev/work
     environment:
       - MINIO_ROOT_USER=admin
-      - MINIO_ROOT_PASSWORD=admin123
+      - MINIO_ROOT_PASSWORD=password
     command: jupyter lab
 networks:
     default:
