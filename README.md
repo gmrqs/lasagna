@@ -1,4 +1,4 @@
-# Ambiente de desenvolvimento interativo de Apache Spark
+## Ambiente de desenvolvimento interativo de Apache Spark
 
 Montado utilizando Docker Compose, Apache Spark, MinIO, Hive, PostgresSQL e Jupyter
 
@@ -16,7 +16,7 @@ Acesse os logs do workspace para obter o link do Jupyter Lab.
 
 Clique no link _http://127.0.0.1:8888/lab?token=<token_gigante_super_seguro>_
 
-## O que é criado?
+### O que é criado?
 
 ![alt text](drawio/analytics-lab.png "Title")
 
