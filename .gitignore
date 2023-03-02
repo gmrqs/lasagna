@@ -1,4 +1,4 @@
 volumes/
-work/.ipynb_checkpoints
-work/utils
-work/projects
+work/.ipynb_checkpoints/
+work/utils/
+work/projects/
