@@ -1,3 +1,2 @@
 volumes/
-work/projects/
-work/utils/
+work/*/
