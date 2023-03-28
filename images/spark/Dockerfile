@@ -50,3 +50,4 @@ RUN curl https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/1.12.2
 RUN curl https://jdbc.postgresql.org/download/postgresql-42.5.0.jar \
     --output ${SPARK_HOME}/jars/postgresql-42.5.0.jar
 
+USER root

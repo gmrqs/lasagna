@@ -62,3 +62,5 @@ COPY conf/entrypoint.sh /entrypoint.sh
 EXPOSE 9083
 
 ENTRYPOINT ["sh", "-c", "/entrypoint.sh"]
+
+USER root

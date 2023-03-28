@@ -59,7 +59,7 @@ services:
     ports:
       - "5051:5051"
     environment:
-      - MINIO_ROOT_USER=admin9000
+      - MINIO_ROOT_USER=admin
       - MINIO_ROOT_PASSWORD=password
       - SPARK_LOCAL_IP=spark-worker-a
     command: usr/local/spark/bin/spark-class org.apache.spark.deploy.worker.Worker --webui-port 5051 spark://spark-master:7077
@@ -83,7 +83,7 @@ services:
     depends_on:
       - spark-master
     ports:
-      - "8080:8080"
+    #  - "8080:8080"
       - "8888:8888"
       - "4040:4040"
     volumes:
@@ -91,7 +91,18 @@ services:
     environment:
       - MINIO_ROOT_USER=admin
       - MINIO_ROOT_PASSWORD=password
-    command: jupyter lab
+    command: jupyter notebook
+  trino:
+    build: ./images/trino
+    networks:
+      - default
+    depends_on:
+      - hive-metastore
+    ports:
+      - "8080:8080"
+    environment:
+      - MINIO_ROOT_USER=admin
+      - MINIO_ROOT_PASSWORD=password
 networks:
     default:
         driver: bridge
