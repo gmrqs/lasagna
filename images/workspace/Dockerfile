@@ -20,11 +20,9 @@ RUN apt-get install python3.11 -y
 
 RUN apt-get install python3-pip -y
 
-#+-----------------------------------+
-#| Instalando Jupyter Notebook + Lab |
-#+-----------------------------------+
-
-RUN pip3 install jupyter notebook
+#+-----------------------+
+#| Instalando JupyterLab |
+#+-----------------------+
 
 RUN pip3 install jupyterlab
 
@@ -32,7 +30,7 @@ RUN pip3 install jupyterlab
 #| Instalando PySpark |
 #+--------------------+
 
-RUN pip3 install pyspark
+RUN pip3 install pyspark==3.3.2
 
 ENV SPARK_HOME=/usr/local/lib/python3.10/dist-packages/pyspark
 
@@ -50,7 +48,6 @@ RUN curl https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/1.12.2
 
 RUN curl https://jdbc.postgresql.org/download/postgresql-42.5.0.jar \
     --output ${SPARK_HOME}/jars/postgresql-42.5.0.jar
-
 
 #+--------------------------------------------------+
 #| Download de dependências Hive Metastore 3.0.0.   |
@@ -496,6 +493,20 @@ RUN curl https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-api/2.10.
     curl https://repo1.maven.org/maven2/org/slf4j/slf4j-api/1.7.30/slf4j-api-1.7.30.jar \ 
     --output ${SPARK_HOME}/hms-3.0.0/jars/slf4j-api-1.7.30.jar 
 
+
+#+---------------------------------------------+
+#| Instalando SQL Magics para Trino e SparkSQL |
+#+---------------------------------------------+
+
+RUN apt-get install npm -y
+RUN npm list -g
+RUN npm install -g sql-language-server
+
+RUN pip3 install jupyterlab-lsp jupyterlab-sql-editor trino pyspark dbt-core
+RUN pip3 uninstall dbt-core -y
+RUN pip3 install dbt-core==1.01
+RUN pip3 install bokeh
+
 #+----------------------------------------+
 #| Configurações Jupyter e spark-defaults |
 #+----------------------------------------+
@@ -503,5 +514,9 @@ RUN curl https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-api/2.10.
 COPY conf/jupyter_notebook_config.py /root/.jupyter/
 
 COPY conf/spark-defaults.conf ${SPARK_HOME}/conf/
+
+COPY conf/ipython_config.py /root/.ipython/profile_default/
+
+# COPY conf/plugin.jupyterlab-settings /root/.jupyter/lab/user-settings/@jupyter-lsp/jupyterlab-lsp/
 
 USER root
