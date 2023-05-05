@@ -41,8 +41,6 @@ services:
     ports:
       - "5050:5050"
       - "7077:7077"
-    networks:
-      - default
     depends_on:
       - postgres
     networks:
@@ -109,14 +107,3 @@ networks:
   my_network:
     driver: bridge
     name: my_network
-    
-#networks:
-#    default:
-#        driver: bridge
-#        ipam:
-#          config:
-#            - subnet:  10.103.0.1/16
-#  trino:
-#    build: ./images/trino
-#    networks:
-#      - my_network

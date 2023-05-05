@@ -46,13 +46,15 @@ RUN curl https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.3.4/hadoo
 RUN curl https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/1.12.262/aws-java-sdk-bundle-1.12.262.jar \
     --output ${HADOOP_HOME}/share/hadoop/tools/lib/aws-java-sdk-bundle-1.12.262.jar
 
+ENV HADOOP_CLASSPATH=${HADOOP_HOME}/share/hadoop/tools/lib/aws-java-sdk-bundle-1.12.262.jar:${HADOOP_HOME}/share/hadoop/tools/lib/hadoop-aws-3.3.4.jar:${HADOOP_HOME}/share/hadoop/tools/lib/delta-hive-assembly_2.11-0.2.0.jar:
+
+# Dependencias Delta (teste)
+
 RUN curl https://github.com/delta-io/connectors/releases/download/v0.2.0/delta-hive-assembly_2.11-0.2.0.jar \
     --output /usr/local/delta-hive-assembly_2.11-0.2.0.jar
 RUN cp /usr/local/delta-hive-assembly_2.11-0.2.0.jar ${HIVE_HOME}/lib/
 RUN cp /usr/local/delta-hive-assembly_2.11-0.2.0.jar ${HADOOP_HOME}/share/hadoop/tools/lib/
 RUN rm /usr/local/delta-hive-assembly_2.11-0.2.0.jar
-
-ENV HADOOP_CLASSPATH=${HADOOP_HOME}/share/hadoop/tools/lib/aws-java-sdk-bundle-1.12.262.jar:${HADOOP_HOME}/share/hadoop/tools/lib/hadoop-aws-3.3.4.jar:${HADOOP_HOME}/share/hadoop/tools/lib/delta-hive-assembly_2.11-0.2.0.jar:
 
 COPY conf/metastore-site.xml ${HIVE_HOME}/conf
 COPY conf/entrypoint.sh /entrypoint.sh

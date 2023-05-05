@@ -1,3 +1,10 @@
+#+-----------------------------------------+
+#|           Imagem Spark 3.3.2            | 
+#|                                         |
+#| O que decide se é Driver ou Worker      |
+#| é o comando de inicialização no compose |
+#+-----------------------------------------+
+
 FROM ubuntu:22.10
 
 SHELL ["/bin/bash", "-c"]
