@@ -26,6 +26,7 @@ O template docker-compose.yml cria uma série de containers, entre eles:
 Um cliente Jupyter para sessões de desenvolvimento interativo com:
 + Diretório 'work' para persistir scripts e notebooks criados;
 + spark-defaults.conf para facilitar configuração das SparkSessions no cluster;
++ NOVO! Extensão jupyter_sql_editor instalada para utilização dos comandos magic %sparksql e %trino 
 
 #### MinIO
 Uma instância do MinIO, serviço de object storage que emula o funcionamento de um S3 com:
@@ -45,3 +46,14 @@ Uma instância do Hive Standalone Metastore utilizando PostgreSQL no back-end pa
 + Diretório _mount/postgres_ para persistir tabelas entre sessões de desenvolvimento
 + Comunicação com o cluster Spark através do Thrift na porta 9083
 + Comunicação com o PostgresSQL através de JDBC na porta 5432
+
+#### NOVO! Trino
+Uma instancia unica de Trino para servir de motor de query. Já integrado com Hive Metastore e MinIO
++ Catálogo Hive já configurado. Toda tabela criada via PySpark será acessível no Trino
++ Serviço disponível na porta padrão 8080
+
+#### NOVO! Kafka
+Docker compose de uma instancia zookeper + single-node de kafka para criação de um stream de dados fictício com um producer em Python.
++ Utiliza a mesma network criado pelo compose do PySpark.
++ Script de kafka-producer disponível utilizando Faker para gerar eventos aleatórios no kafka
++ Acessivel através do kafka:29092
