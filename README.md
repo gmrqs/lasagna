@@ -1,4 +1,4 @@
-![alt text](drawio/pastabricks.png "Title")
+![alt text](drawio/pastabricks-2.png "Title")
 Ou pastabricks, se preferir, é um ambiente de desenvolvimento interativo que criei para praticar PySpark
 
 Montado utilizando Docker Compose ele estrutura um Jupyter Lab, Cluster Spark, MinIO object storage, Hive Metastore, Trino e de quebra vem um Kafka pra simular eventos/streaming.
