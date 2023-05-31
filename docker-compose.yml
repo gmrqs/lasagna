@@ -1,5 +1,6 @@
 services:
   minio:
+    container_name: minio
     image: minio/minio
     networks:
       - my_network
@@ -14,6 +15,7 @@ services:
       - MINIO_ROOT_PASSWORD=password
     command: server /data --console-address ":9090"
   postgres:
+    container_name: postgres
     image: postgres:14.2-alpine
     ports:
       - 5432:5432
@@ -28,6 +30,7 @@ services:
     volumes:
       - ./mount/postgres/data:/var/lib/postgresql/data
   hive-metastore:
+    container_name: hive-metastore
     build: ./images/hive-metastore
     ports:
       - 9083:9083
@@ -37,6 +40,7 @@ services:
       - my_network
     restart: always
   spark-master:
+    container_name: spark-master
     build: ./images/spark
     ports:
       - "5050:5050"
@@ -51,6 +55,7 @@ services:
       - SPARK_LOCAL_IP=spark-master
     command: usr/local/spark/bin/spark-class org.apache.spark.deploy.master.Master --ip spark-master --port 7077 --webui-port 5050
   spark-worker-a:
+    container_name: spark-worker-a
     build: ./images/spark
     depends_on:
       - spark-master
@@ -64,6 +69,7 @@ services:
       - SPARK_LOCAL_IP=spark-worker-a
     command: usr/local/spark/bin/spark-class org.apache.spark.deploy.worker.Worker --webui-port 5051 spark://spark-master:7077
   spark-worker-b:
+    container_name: spark-worker-b
     build: ./images/spark
     depends_on:
       - spark-master
@@ -77,6 +83,7 @@ services:
       - SPARK_LOCAL_IP=spark-worker-b
     command: usr/local/spark/bin/spark-class org.apache.spark.deploy.worker.Worker --webui-port 5052 spark://spark-master:7077
   workspace:
+    container_name: workspace
     build: ./images/workspace
     depends_on:
       - spark-master
@@ -92,6 +99,7 @@ services:
       - MINIO_ROOT_PASSWORD=password
     command: jupyter lab --port 8888
   trino:
+    container_name: trino
     build: ./images/trino
     depends_on:
       - hive-metastore
