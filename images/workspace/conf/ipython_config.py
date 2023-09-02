@@ -3,8 +3,9 @@ c = get_config()
 
 # Pre-load the sparksql+trino magic
 c.InteractiveShellApp.extensions = [
-    'jupyterlab_sql_editor.ipython_magic_trino','jupyterlab_sql_editor.ipython_magic_sparksql'
-        ]
+    'jupyterlab_sql_editor.ipython_magic.trino',
+    'jupyterlab_sql_editor.ipython_magic.sparksql'
+    ]
 
 # Pre-configure the sparksql magic
 
@@ -26,7 +27,7 @@ c.Trino.httpScheme='http'
 c.Trino.cacheTTL=3600
 c.Trino.outputFile='/tmp/trinodb.schema.json'
 # comma-separated list of catalogs
-c.Trino.catalogs="system,tpch,hive"
+c.Trino.catalogs="system,tpch,hive,delta,iceberg"
 
 from IPython.core.interactiveshell import InteractiveShell
 InteractiveShell.ast_noode_interactivity = 'all'

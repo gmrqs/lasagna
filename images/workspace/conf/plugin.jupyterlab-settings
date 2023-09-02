@@ -1,40 +1,5 @@
 {
     "language_servers": {
-        "julia-language-server": {
-            "priority": 50,
-            "serverSettings": {
-                "julia.lint.run": true,
-                "julia.lint.missingrefs": "none",
-                "julia.lint.disabledDirs": [
-                    "docs",
-                    "test"
-                ],
-                "julia.lint.call": true,
-                "julia.lint.iter": true,
-                "julia.lint.nothingcomp": true,
-                "julia.lint.constif": true,
-                "julia.lint.lazy": true,
-                "julia.lint.datadecl": true,
-                "julia.lint.typeparam": true,
-                "julia.lint.modname": true,
-                "julia.lint.pirates": true,
-                "julia.lint.useoffuncargs": true,
-                "julia.completionmode": "qualify"
-            }
-        },
-        "r-languageserver": {
-            "priority": 50,
-            "serverSettings": {
-                "r.lsp.debug": true,
-                "r.lsp.log_file": null,
-                "r.lsp.diagnostics": true,
-                "r.lsp.rich_documentation": true,
-                "r.lsp.snippet_support": true,
-                "r.lsp.max_completions": 200,
-                "r.lsp.lint_cache": false,
-                "r.lsp.link_file_size_limit": 16384
-            }
-        },
         "sql-language-server": {
             "priority": 50,
             "serverSettings": {
@@ -49,31 +14,6 @@
                         "ssh": null
                     }
                 ]
-            }
-        },
-        "texlab": {
-            "priority": 50,
-            "serverSettings": {
-                "rootDirectory": null,
-                "build.executable": "latexmk",
-                "build.args": [
-                    "-pdf",
-                    "-interaction=nonstopmode",
-                    "-synctex=1",
-                    "%f"
-                ],
-                "build.onSave": false,
-                "build.outputDirectory": ".",
-                "build.forwardSearchAfter": false,
-                "forwardSearch.executable": null,
-                "forwardSearch.args": [],
-                "chktex.onOpenAndSave": false,
-                "chktex.onEdit": false,
-                "diagnosticsDelay": 300,
-                "formatterLineLength": 80,
-                "latexFormatter": "latexindent",
-                "latexindent.local": null,
-                "latexindent.modifyLineBreaks": false
             }
         },
         "sparksql-language-server": {

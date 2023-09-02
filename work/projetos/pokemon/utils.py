@@ -100,3 +100,9 @@ def unnest_struct_array(df, verbose = False):
             print('INFO: RESETANDO O LOOP')
     
     return unnest_struct_array(df = df)
+
+def mapBy(dataframe, map_by, map_col_name, drop_these):
+    cols_to_map = [f(x) for x in df.drop(map_by, *drop_these).columns for f in (lit, col) ]
+    result_df = df.withColumn(map_col_name, create_map(cols_to_map))
+    result_df = result_df.select([map_by, map_col_name])
+    return result_df

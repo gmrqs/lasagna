@@ -1019,7 +1019,7 @@ c.NotebookApp.notebook_dir = 'usr/local/spark_dev/work'
 #          platform's trash/recycle bin, where they can be recovered. If False,
 #          deleting files really deletes them.
 #  Default: True
-# c.FileContentsManager.delete_to_trash = True
+c.FileContentsManager.delete_to_trash = False
 
 ## handler class to use when serving raw file requests.
 #  See also: ContentsManager.files_handler_class

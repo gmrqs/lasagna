@@ -1,522 +1,152 @@
-FROM ubuntu:22.10
+FROM ubuntu:22.04
 
 SHELL ["/bin/bash", "-c"]
-
 RUN apt-get update --fix-missing
-
 RUN apt-get install openjdk-11-jdk -y  
 
 #+-----------------+
-#| Instalando cURL |
+#| Installing cURL |
 #+-----------------+
 
 RUN apt-get install curl -y
 
-#+------------------------------+
-#| Instalando Python 3.11, pip3 |
-#+------------------------------+
+#+------------------------+
+#| Installing Python pip3 |
+#+------------------------+
 
-RUN apt-get install python3.11 -y
-
-RUN apt-get install python3-pip -y
+RUN apt-get install python3-pip -y --fix-missing
 
 #+-----------------------+
-#| Instalando JupyterLab |
+#| Installing JupyterLab |
 #+-----------------------+
 
-RUN pip3 install jupyterlab
+RUN pip install jupyterlab
 
 #+--------------------+
-#| Instalando PySpark |
+#| Installing PySpark |
 #+--------------------+
 
-RUN pip3 install pyspark==3.3.2
+RUN pip install pyspark==3.4.1
 
 ENV SPARK_HOME=/usr/local/lib/python3.10/dist-packages/pyspark
 
 RUN mkdir -p usr/local/spark_dev/work/
 
 #+----------------------------------+
-#| Instalando dependências S3/MinIO |
+#| Installing S3/MinIO dependencies |
 #+----------------------------------+
 
 RUN curl https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.3.4/hadoop-aws-3.3.4.jar \
-    --output ${SPARK_HOME}/jars/hadoop-aws-3.3.4.jar
-
+    --output $SPARK_HOME/jars/hadoop-aws-3.3.4.jar
 RUN curl https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/1.12.262/aws-java-sdk-bundle-1.12.262.jar \
-    --output ${SPARK_HOME}/jars/aws-java-sdk-bundle-1.12.262.jar
-
+    --output $SPARK_HOME/jars/aws-java-sdk-bundle-1.12.262.jar
 RUN curl https://jdbc.postgresql.org/download/postgresql-42.5.0.jar \
-    --output ${SPARK_HOME}/jars/postgresql-42.5.0.jar
+    --output $SPARK_HOME/jars/postgresql-42.5.0.jar
 
 #+--------------------------------------------------+
-#| Download de dependências Hive Metastore 3.0.0.   |
+#| Downloading Hive Metastore 3.0.0 dependencies    |
 #|                                                  |
-#|   Obtidas utilizando configurações:              |
+#|   Obtained using these configurations:           |
 #|                                                  |
 #|    spark.sql.hive.metastore.jars=maven           |
 #|    spark.sql.hive.metastore.version=3.0.0        |
 #|                                                  |
-#|   iniciar a SparkSesison com essas Configurações |
-#|    e executar qualquer comando spark.sql()       |
+#|   start a SparkSession with these configs        |
+#|   and execute any spark.sql() command            |
 #|                                                  |
 #+--------------------------------------------------+
 
 RUN mkdir -p ${SPARK_HOME}/hms-3.0.0/jars
-
-RUN curl https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-api/2.10.0/log4j-api-2.10.0.jar \
-    --output ${SPARK_HOME}/hms-3.0.0/jars/log4j-api-2.10.0.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/derby/derby/10.14.1.0/derby-10.14.1.0.jar \
-    --output ${SPARK_HOME}/hms-3.0.0/jars/derby-10.14.1.0.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/hive/hive-metastore/3.0.0/hive-metastore-3.0.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/hive-metastore-3.0.0.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/hive/hive-exec/3.0.0/hive-exec-3.0.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/hive-exec-3.0.0.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/hive/hive-common/3.0.0/hive-common-3.0.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/hive-common-3.0.0.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/hive/hive-serde/3.0.0/hive-serde-3.0.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/hive-serde-3.0.0.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-client-api/3.3.2/hadoop-client-api-3.3.2.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/hadoop-client-api-3.3.2.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-client-runtime/3.3.2/hadoop-client-runtime-3.3.2.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/hadoop-client-runtime-3.3.2.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/hive/hive-shims/3.0.0/hive-shims-3.0.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/hive-shims-3.0.0.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/hive/hive-standalone-metastore/3.0.0/hive-standalone-metastore-3.0.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/hive-standalone-metastore-3.0.0.jar && \
-    curl https://repo1.maven.org/maven2/javolution/javolution/5.5.1/javolution-5.5.1.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/javolution-5.5.1.jar && \
-    curl https://repo1.maven.org/maven2/com/google/guava/guava/19.0/guava-19.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/guava-19.0.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/hbase/hbase-client/2.0.0-alpha4/hbase-client-2.0.0-alpha4.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/hbase-client-2.0.0-alpha4.jar && \
-    curl https://repo1.maven.org/maven2/com/jolbox/bonecp/0.8.0.RELEASE/bonecp-0.8.0.RELEASE.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/bonecp-0.8.0.RELEASE.jar && \
-    curl https://repo1.maven.org/maven2/com/zaxxer/HikariCP/2.6.1/HikariCP-2.6.1.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/HikariCP-2.6.1.jar && \
-    curl https://repo1.maven.org/maven2/commons-cli/commons-cli/1.2/commons-cli-1.2.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/commons-cli-1.2.jar && \
-    curl https://repo1.maven.org/maven2/commons-lang/commons-lang/2.6/commons-lang-2.6.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/commons-lang-2.6.jar && \
-    curl https://repo1.maven.org/maven2/commons-pool/commons-pool/1.5.4/commons-pool-1.5.4.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/commons-pool-1.5.4.jar && \
-    curl https://repo1.maven.org/maven2/commons-dbcp/commons-dbcp/1.4/commons-dbcp-1.4.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/commons-dbcp-1.4.jar && \
-    curl https://repo1.maven.org/maven2/javax/jdo/jdo-api/3.0.1/jdo-api-3.0.1.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/jdo-api-3.0.1.jar && \
-    curl https://repo1.maven.org/maven2/org/antlr/antlr-runtime/3.5.2/antlr-runtime-3.5.2.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/antlr-runtime-3.5.2.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/thrift/libfb303/0.9.3/libfb303-0.9.3.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/libfb303-0.9.3.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/thrift/libthrift/0.9.3/libthrift-0.9.3.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/libthrift-0.9.3.jar && \
-    curl https://repo1.maven.org/maven2/co/cask/tephra/tephra-api/0.6.0/tephra-api-0.6.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/tephra-api-0.6.0.jar && \
-    curl https://repo1.maven.org/maven2/co/cask/tephra/tephra-core/0.6.0/tephra-core-0.6.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/tephra-core-0.6.0.jar && \
-    curl https://repo1.maven.org/maven2/co/cask/tephra/tephra-hbase-compat-1.0/0.6.0/tephra-hbase-compat-1.0-0.6.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/tephra-hbase-compat-1.0-0.6.0.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/hive/hive-service-rpc/3.0.0/hive-service-rpc-3.0.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/hive-service-rpc-3.0.0.jar && \
-    curl https://repo1.maven.org/maven2/commons-codec/commons-codec/1.7/commons-codec-1.7.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/commons-codec-1.7.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/arrow/arrow-vector/0.8.0/arrow-vector-0.8.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/arrow-vector-0.8.0.jar && \
-    curl https://repo1.maven.org/maven2/com/carrotsearch/hppc/0.7.2/hppc-0.7.2.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/hppc-0.7.2.jar && \
-    curl https://repo1.maven.org/maven2/com/vlkan/flatbuffers/1.2.0-3f79e055/flatbuffers-1.2.0-3f79e055.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/flatbuffers-1.2.0-3f79e055.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/avro/avro/1.7.7/avro-1.7.7.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/avro-1.7.7.jar && \
-    curl https://repo1.maven.org/maven2/net/sf/opencsv/opencsv/2.3/opencsv-2.3.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/opencsv-2.3.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/parquet/parquet-hadoop-bundle/1.9.0/parquet-hadoop-bundle-1.9.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/parquet-hadoop-bundle-1.9.0.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/hive/hive-classification/3.0.0/hive-classification-3.0.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/hive-classification-3.0.0.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/hive/hive-storage-api/2.6.1/hive-storage-api-2.6.1.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/hive-storage-api-2.6.1.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/orc/orc-core/1.4.3/orc-core-1.4.3.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/orc-core-1.4.3.jar && \
-    curl https://repo1.maven.org/maven2/jline/jline/2.12/jline-2.12.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/jline-2.12.jar && \
-    curl https://repo1.maven.org/maven2/javax/servlet/javax.servlet-api/3.1.0/javax.servlet-api-3.1.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/javax.servlet-api-3.1.0.jar && \
-    curl https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-http/9.3.8.v20160314/jetty-http-9.3.8.v20160314.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/jetty-http-9.3.8.v20160314.jar && \
-    curl https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-rewrite/9.3.8.v20160314/jetty-rewrite-9.3.8.v20160314.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/jetty-rewrite-9.3.8.v20160314.jar && \
-    curl https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-server/9.3.8.v20160314/jetty-server-9.3.8.v20160314.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/jetty-server-9.3.8.v20160314.jar && \
-    curl https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-servlet/9.3.8.v20160314/jetty-servlet-9.3.8.v20160314.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/jetty-servlet-9.3.8.v20160314.jar && \
-    curl https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-webapp/9.3.8.v20160314/jetty-webapp-9.3.8.v20160314.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/jetty-webapp-9.3.8.v20160314.jar && \
-    curl https://repo1.maven.org/maven2/joda-time/joda-time/2.9.9/joda-time-2.9.9.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/joda-time-2.9.9.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-1.2-api/2.10.0/log4j-1.2-api-2.10.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/log4j-1.2-api-2.10.0.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-web/2.10.0/log4j-web-2.10.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/log4j-web-2.10.0.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-slf4j-impl/2.10.0/log4j-slf4j-impl-2.10.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/log4j-slf4j-impl-2.10.0.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/commons/commons-compress/1.9/commons-compress-1.9.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/commons-compress-1.9.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/ant/ant/1.9.1/ant-1.9.1.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/ant-1.9.1.jar && \
-    curl https://repo1.maven.org/maven2/net/sf/jpam/jpam/1.1/jpam-1.1.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/jpam-1.1.jar && \
-    curl https://repo1.maven.org/maven2/com/tdunning/json/1.8/json-1.8.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/json-1.8.jar && \
-    curl https://repo1.maven.org/maven2/io/dropwizard/metrics/metrics-jvm/3.1.0/metrics-jvm-3.1.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/metrics-jvm-3.1.0.jar && \
-    curl https://repo1.maven.org/maven2/io/dropwizard/metrics/metrics-json/3.1.0/metrics-json-3.1.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/metrics-json-3.1.0.jar  && \
-    curl https://repo1.maven.org/maven2/com/fasterxml/jackson/core/jackson-databind/2.9.4/jackson-databind-2.9.4.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/jackson-databind-2.9.4.jar && \
-    curl https://repo1.maven.org/maven2/com/github/joshelser/dropwizard-metrics-hadoop-metrics2-reporter/0.1.2/dropwizard-metrics-hadoop-metrics2-reporter-0.1.2.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/dropwizard-metrics-hadoop-metrics2-reporter-0.1.2.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/hive/shims/hive-shims-common/3.0.0/hive-shims-common-3.0.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/hive-shims-common-3.0.0.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/zookeeper/zookeeper/3.4.6/zookeeper-3.4.6.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/zookeeper-3.4.6.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/httpcomponents/httpclient/4.5.2/httpclient-4.5.2.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/httpclient-4.5.2.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/httpcomponents/httpcore/4.4.4/httpcore-4.4.4.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/httpcore-4.4.4.jar && \
-    curl https://repo1.maven.org/maven2/commons-logging/commons-logging/1.2/commons-logging-1.2.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/commons-logging-1.2.jar && \
-    curl https://repo1.maven.org/maven2/org/slf4j/slf4j-log4j12/1.6.1/slf4j-log4j12-1.6.1.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/slf4j-log4j12-1.6.1.jar && \
-    curl https://repo1.maven.org/maven2/io/netty/netty/3.7.0.Final/netty-3.7.0.Final.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/netty-3.7.0.Final.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/hive/shims/hive-shims-0.23/3.0.0/hive-shims-0.23-3.0.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/hive-shims-0.23-3.0.0.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/hive/shims/hive-shims-scheduler/3.0.0/hive-shims-scheduler-3.0.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/hive-shims-scheduler-3.0.0.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-core/2.10.0/log4j-core-2.10.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/log4j-core-2.10.0.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-yarn-server-resourcemanager/3.1.0/hadoop-yarn-server-resourcemanager-3.1.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/hadoop-yarn-server-resourcemanager-3.1.0.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-annotations/3.1.0/hadoop-annotations-3.1.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/hadoop-annotations-3.1.0.jar && \
-    curl https://repo1.maven.org/maven2/com/google/inject/extensions/guice-servlet/4.0/guice-servlet-4.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/guice-servlet-4.0.jar && \
-    curl https://repo1.maven.org/maven2/com/google/protobuf/protobuf-java/2.5.0/protobuf-java-2.5.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/protobuf-java-2.5.0.jar && \
-    curl https://repo1.maven.org/maven2/commons-io/commons-io/2.4/commons-io-2.4.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/commons-io-2.4.jar && \
-    curl https://repo1.maven.org/maven2/com/google/inject/guice/4.0/guice-4.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/guice-4.0.jar && \
-    curl https://repo1.maven.org/maven2/com/sun/jersey/jersey-json/1.19/jersey-json-1.19.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/jersey-json-1.19.jar && \
-    curl https://repo1.maven.org/maven2/com/sun/jersey/contribs/jersey-guice/1.19/jersey-guice-1.19.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/jersey-guice-1.19.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-yarn-common/3.1.0/hadoop-yarn-common-3.1.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/hadoop-yarn-common-3.1.0.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-yarn-api/3.1.0/hadoop-yarn-api-3.1.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/hadoop-yarn-api-3.1.0.jar && \
-    curl https://repo1.maven.org/maven2/javax/xml/bind/jaxb-api/2.2.11/jaxb-api-2.2.11.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/jaxb-api-2.2.11.jar && \
-    curl https://repo1.maven.org/maven2/org/codehaus/jettison/jettison/1.1/jettison-1.1.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/jettison-1.1.jar && \
-    curl https://repo1.maven.org/maven2/com/sun/jersey/jersey-core/1.19/jersey-core-1.19.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/jersey-core-1.19.jar && \
-    curl https://repo1.maven.org/maven2/com/sun/jersey/jersey-client/1.19/jersey-client-1.19.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/jersey-client-1.19.jar && \
-    curl https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-util/9.3.19.v20170502/jetty-util-9.3.19.v20170502.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/jetty-util-9.3.19.v20170502.jar && \
-    curl https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-util-ajax/9.3.19.v20170502/jetty-util-ajax-9.3.19.v20170502.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/jetty-util-ajax-9.3.19.v20170502.jar && \
-    curl https://repo1.maven.org/maven2/log4j/log4j/1.2.17/log4j-1.2.17.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/log4j-1.2.17.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-yarn-server-common/3.1.0/hadoop-yarn-server-common-3.1.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/hadoop-yarn-server-common-3.1.0.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-yarn-server-applicationhistoryservice/3.1.0/hadoop-yarn-server-applicationhistoryservice-3.1.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/hadoop-yarn-server-applicationhistoryservice-3.1.0.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-yarn-server-web-proxy/3.1.0/hadoop-yarn-server-web-proxy-3.1.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/hadoop-yarn-server-web-proxy-3.1.0.jar && \
-    curl https://repo1.maven.org/maven2/org/fusesource/leveldbjni/leveldbjni-all/1.8/leveldbjni-all-1.8.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/leveldbjni-all-1.8.jar && \
-    curl https://repo1.maven.org/maven2/javax/inject/javax.inject/1/javax.inject-1.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/javax.inject-1.jar && \
-    curl https://repo1.maven.org/maven2/aopalliance/aopalliance/1.0/aopalliance-1.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/aopalliance-1.0.jar && \
-    curl https://repo1.maven.org/maven2/com/sun/xml/bind/jaxb-impl/2.2.3-1/jaxb-impl-2.2.3-1.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/jaxb-impl-2.2.3-1.jar && \
-    curl https://repo1.maven.org/maven2/org/codehaus/jackson/jackson-core-asl/1.9.13/jackson-core-asl-1.9.13.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/jackson-core-asl-1.9.13.jar && \
-    curl https://repo1.maven.org/maven2/org/codehaus/jackson/jackson-mapper-asl/1.9.13/jackson-mapper-asl-1.9.13.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/jackson-mapper-asl-1.9.13.jar && \
-    curl https://repo1.maven.org/maven2/org/codehaus/jackson/jackson-jaxrs/1.9.13/jackson-jaxrs-1.9.13.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/jackson-jaxrs-1.9.13.jar && \
-    curl https://repo1.maven.org/maven2/org/codehaus/jackson/jackson-xc/1.9.13/jackson-xc-1.9.13.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/jackson-xc-1.9.13.jar && \
-    curl https://repo1.maven.org/maven2/javax/ws/rs/jsr311-api/1.1.1/jsr311-api-1.1.1.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/jsr311-api-1.1.1.jar && \
-    curl https://repo1.maven.org/maven2/com/sun/jersey/jersey-servlet/1.19/jersey-servlet-1.19.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/jersey-servlet-1.19.jar && \
-    curl https://repo1.maven.org/maven2/com/sun/jersey/jersey-server/1.19/jersey-server-1.19.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/jersey-server-1.19.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-auth/3.1.0/hadoop-auth-3.1.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/hadoop-auth-3.1.0.jar && \
-    curl https://repo1.maven.org/maven2/com/fasterxml/jackson/core/jackson-core/2.9.4/jackson-core-2.9.4.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/jackson-core-2.9.4.jar && \
-    curl https://repo1.maven.org/maven2/com/fasterxml/jackson/module/jackson-module-jaxb-annotations/2.9.4/jackson-module-jaxb-annotations-2.9.4.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/jackson-module-jaxb-annotations-2.9.4.jar && \
-    curl https://repo1.maven.org/maven2/com/fasterxml/jackson/jaxrs/jackson-jaxrs-json-provider/2.9.4/jackson-jaxrs-json-provider-2.9.4.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/jackson-jaxrs-json-provider-2.9.4.jar && \
-    curl https://repo1.maven.org/maven2/com/fasterxml/jackson/core/jackson-annotations/2.9.4/jackson-annotations-2.9.4.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/jackson-annotations-2.9.4.jar && \
-    curl https://repo1.maven.org/maven2/com/nimbusds/nimbus-jose-jwt/4.41.1/nimbus-jose-jwt-4.41.1.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/nimbus-jose-jwt-4.41.1.jar && \
-    curl https://repo1.maven.org/maven2/net/minidev/json-smart/2.3/json-smart-2.3.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/json-smart-2.3.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/kerby/kerb-simplekdc/1.0.1/kerb-simplekdc-1.0.1.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/kerb-simplekdc-1.0.1.jar && \
-    curl https://repo1.maven.org/maven2/com/github/stephenc/jcip/jcip-annotations/1.0-1/jcip-annotations-1.0-1.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/jcip-annotations-1.0-1.jar && \
-    curl https://repo1.maven.org/maven2/net/minidev/accessors-smart/1.2/accessors-smart-1.2.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/accessors-smart-1.2.jar && \
-    curl https://repo1.maven.org/maven2/org/ow2/asm/asm/5.0.4/asm-5.0.4.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/asm-5.0.4.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/kerby/kerb-client/1.0.1/kerb-client-1.0.1.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/kerb-client-1.0.1.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/kerby/kerb-admin/1.0.1/kerb-admin-1.0.1.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/kerb-admin-1.0.1.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/kerby/kerby-config/1.0.1/kerby-config-1.0.1.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/kerby-config-1.0.1.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/kerby/kerb-core/1.0.1/kerb-core-1.0.1.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/kerb-core-1.0.1.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/kerby/kerb-common/1.0.1/kerb-common-1.0.1.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/kerb-common-1.0.1.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/kerby/kerb-util/1.0.1/kerb-util-1.0.1.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/kerb-util-1.0.1.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/kerby/token-provider/1.0.1/token-provider-1.0.1.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/token-provider-1.0.1.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/kerby/kerby-pkix/1.0.1/kerby-pkix-1.0.1.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/kerby-pkix-1.0.1.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/kerby/kerby-asn1/1.0.1/kerby-asn1-1.0.1.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/kerby-asn1-1.0.1.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/kerby/kerby-util/1.0.1/kerby-util-1.0.1.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/kerby-util-1.0.1.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/kerby/kerb-crypto/1.0.1/kerb-crypto-1.0.1.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/kerb-crypto-1.0.1.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/kerby/kerb-server/1.0.1/kerb-server-1.0.1.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/kerb-server-1.0.1.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/kerby/kerby-xdr/1.0.1/kerby-xdr-1.0.1.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/kerby-xdr-1.0.1.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/kerby/kerb-identity/1.0.1/kerb-identity-1.0.1.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/kerb-identity-1.0.1.jar && \
-    curl https://repo1.maven.org/maven2/com/fasterxml/jackson/jaxrs/jackson-jaxrs-base/2.9.4/jackson-jaxrs-base-2.9.4.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/jackson-jaxrs-base-2.9.4.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-yarn-registry/3.1.0/hadoop-yarn-registry-3.1.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/hadoop-yarn-registry-3.1.0.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/geronimo/specs/geronimo-jcache_1.0_spec/1.0-alpha-1/geronimo-jcache_1.0_spec-1.0-alpha-1.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/geronimo-jcache_1.0_spec-1.0-alpha-1.jar && \
-    curl https://repo1.maven.org/maven2/org/ehcache/ehcache/3.3.1/ehcache-3.3.1.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/ehcache-3.3.1.jar && \
-    curl https://repo1.maven.org/maven2/com/zaxxer/HikariCP-java7/2.4.12/HikariCP-java7-2.4.12.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/HikariCP-java7-2.4.12.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-common/3.1.0/hadoop-common-3.1.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/hadoop-common-3.1.0.jar && \
-    curl https://repo1.maven.org/maven2/commons-daemon/commons-daemon/1.0.13/commons-daemon-1.0.13.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/commons-daemon-1.0.13.jar && \
-    curl https://repo1.maven.org/maven2/commons-net/commons-net/3.6/commons-net-3.6.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/commons-net-3.6.jar && \
-    curl https://repo1.maven.org/maven2/dnsjava/dnsjava/2.1.7/dnsjava-2.1.7.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/dnsjava-2.1.7.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/commons/commons-math3/3.1.1/commons-math3-3.1.1.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/commons-math3-3.1.1.jar && \
-    curl https://repo1.maven.org/maven2/commons-collections/commons-collections/3.2.2/commons-collections-3.2.2.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/commons-collections-3.2.2.jar && \
-    curl https://repo1.maven.org/maven2/commons-beanutils/commons-beanutils/1.9.3/commons-beanutils-1.9.3.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/commons/commons-configuration2/2.1.1/commons-configuration2-2.1.1.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/commons-configuration2-2.1.1.jar && \
-    curl https://repo1.maven.org/maven2/com/google/re2j/re2j/1.1/re2j-1.1.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/re2j-1.1.jar && \
-    curl https://repo1.maven.org/maven2/com/google/code/gson/gson/2.2.4/gson-2.2.4.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/gson-2.2.4.jar && \
-    curl https://repo1.maven.org/maven2/com/jcraft/jsch/0.1.54/jsch-0.1.54.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/jsch-0.1.54.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/htrace/htrace-core4/4.1.0-incubating/htrace-core4-4.1.0-incubating.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/htrace-core4-4.1.0-incubating.jar && \
-    curl https://repo1.maven.org/maven2/org/codehaus/woodstox/stax2-api/3.1.4/stax2-api-3.1.4.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/stax2-api-3.1.4.jar && \
-    curl https://repo1.maven.org/maven2/com/fasterxml/woodstox/woodstox-core/5.0.3/woodstox-core-5.0.3.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/woodstox-core-5.0.3.jar && \
-    curl https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-io/9.3.8.v20160314/jetty-io-9.3.8.v20160314.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/jetty-io-9.3.8.v20160314.jar && \
-    curl https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-security/9.3.8.v20160314/jetty-security-9.3.8.v20160314.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/jetty-security-9.3.8.v20160314.jar && \
-    curl https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-xml/9.3.8.v20160314/jetty-xml-9.3.8.v20160314.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/jetty-xml-9.3.8.v20160314.jar && \
-    curl https://repo1.maven.org/maven2/com/thoughtworks/paranamer/paranamer/2.3/paranamer-2.3.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/paranamer-2.3.jar && \
-    curl https://repo1.maven.org/maven2/de/ruedigermoeller/fst/2.50/fst-2.50.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/fst-2.50.jar && \
-    curl https://repo1.maven.org/maven2/com/cedarsoftware/java-util/1.9.0/java-util-1.9.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/java-util-1.9.0.jar  && \
-    curl https://repo1.maven.org/maven2/com/cedarsoftware/json-io/2.5.1/json-io-2.5.1.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/json-io-2.5.1.jar && \
-    curl https://repo1.maven.org/maven2/com/microsoft/sqlserver/mssql-jdbc/6.2.1.jre7/mssql-jdbc-6.2.1.jre7.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/mssql-jdbc-6.2.1.jre7.jar && \
-    curl https://repo1.maven.org/maven2/javax/servlet/jsp/jsp-api/2.1/jsp-api-2.1.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/jsp-api-2.1.jar && \
-    curl https://repo1.maven.org/maven2/io/airlift/aircompressor/0.8/aircompressor-0.8.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/aircompressor-0.8.jar && \
-    curl https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-client/9.3.8.v20160314/jetty-client-9.3.8.v20160314.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/jetty-client-9.3.8.v20160314.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/ant/ant-launcher/1.9.1/ant-launcher-1.9.1.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/ant-launcher-1.9.1.jar && \
-    curl https://repo1.maven.org/maven2/tomcat/jasper-compiler/5.5.23/jasper-compiler-5.5.23.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/.jar && \
-    curl https://repo1.maven.org/maven2/tomcat/jasper-runtime/5.5.23/jasper-runtime-5.5.23.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/jasper-compiler-5.5.23.jar && \
-    curl https://repo1.maven.org/maven2/javax/servlet/jsp-api/2.0/jsp-api-2.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/jsp-api-2.0.jar && \
-    curl https://repo1.maven.org/maven2/ant/ant/1.6.5/ant-1.6.5.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/ant-1.6.5.jar && \
-    curl https://repo1.maven.org/maven2/javax/servlet/servlet-api/2.4/servlet-api-2.4.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/servlet-api-2.4.jar && \
-    curl https://repo1.maven.org/maven2/commons-el/commons-el/1.0/commons-el-1.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/commons-el-1.0.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/arrow/arrow-format/0.8.0/arrow-format-0.8.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/arrow-format-0.8.0.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/arrow/arrow-memory/0.8.0/arrow-memory-0.8.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/arrow-memory-0.8.0.jar && \
-    curl https://repo1.maven.org/maven2/io/netty/netty-buffer/4.1.17.Final/netty-buffer-4.1.17.Final.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/netty-buffer-4.1.17.Final.jar && \
-    curl https://repo1.maven.org/maven2/io/netty/netty-common/4.1.17.Final/netty-common-4.1.17.Final.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/netty-common-4.1.17.Final.jar && \
-    curl https://repo1.maven.org/maven2/org/datanucleus/datanucleus-api-jdo/4.2.4/datanucleus-api-jdo-4.2.4.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/datanucleus-api-jdo-4.2.4.jar && \
-    curl https://repo1.maven.org/maven2/org/datanucleus/datanucleus-core/4.1.17/datanucleus-core-4.1.17.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/datanucleus-core-4.1.17.jar  && \
-    curl https://repo1.maven.org/maven2/org/datanucleus/datanucleus-rdbms/4.1.19/datanucleus-rdbms-4.1.19.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/datanucleus-rdbms-4.1.19.jar && \
-    curl https://repo1.maven.org/maven2/org/datanucleus/javax.jdo/3.2.0-m3/javax.jdo-3.2.0-m3.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/javax.jdo-3.2.0-m3.jar && \
-    curl https://repo1.maven.org/maven2/sqlline/sqlline/1.3.0/sqlline-1.3.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/sqlline-1.3.0.jar && \
-    curl https://repo1.maven.org/maven2/javax/transaction/transaction-api/1.1/transaction-api-1.1.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/transaction-api-1.1.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/hbase/thirdparty/hbase-shaded-protobuf/1.0.1/hbase-shaded-protobuf-1.0.1.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/hbase-shaded-protobuf-1.0.1.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/hbase/hbase-protocol-shaded/2.0.0-alpha4/hbase-protocol-shaded-2.0.0-alpha4.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/hbase-protocol-shaded-2.0.0-alpha4.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/hbase/hbase-protocol/2.0.0-alpha4/hbase-protocol-2.0.0-alpha4.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/hbase-protocol-2.0.0-alpha4.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/commons/commons-lang3/3.6/commons-lang3-3.6.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/commons-lang3-3.6.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/hbase/thirdparty/hbase-shaded-miscellaneous/1.0.1/hbase-shaded-miscellaneous-1.0.1.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/hbase-shaded-miscellaneous-1.0.1.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/hbase/thirdparty/hbase-shaded-netty/1.0.1/hbase-shaded-netty-1.0.1.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/hbase-shaded-netty-1.0.1.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/htrace/htrace-core/3.2.0-incubating/htrace-core-3.2.0-incubating.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/htrace-core-3.2.0-incubating.jar && \
-    curl https://repo1.maven.org/maven2/org/jruby/jcodings/jcodings/1.0.18/jcodings-1.0.18.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/jcodings-1.0.18.jar && \
-    curl https://repo1.maven.org/maven2/org/jruby/joni/joni/2.1.11/joni-2.1.11.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/joni-2.1.11.jar && \
-    curl https://repo1.maven.org/maven2/io/dropwizard/metrics/metrics-core/3.2.1/metrics-core-3.2.1.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/metrics-core-3.2.1.jar && \
-    curl https://repo1.maven.org/maven2/junit/junit/4.11/junit-4.11.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/junit-4.11.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/commons/commons-crypto/1.0.0/commons-crypto-1.0.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/commons-crypto-1.0.0.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/yetus/audience-annotations/0.5.0/audience-annotations-0.5.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/audience-annotations-0.5.0.jar && \
-    curl https://repo1.maven.org/maven2/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/hamcrest-core-1.3.jar && \
-    curl https://repo1.maven.org/maven2/javax/transaction/jta/1.1/jta-1.1.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/jta-1.1.jar && \
-    curl https://repo1.maven.org/maven2/com/google/inject/extensions/guice-assistedinject/3.0/guice-assistedinject-3.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/guice-assistedinject-3.0.jar && \
-    curl https://repo1.maven.org/maven2/it/unimi/dsi/fastutil/6.5.6/fastutil-6.5.6.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/fastutil-6.5.6.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/twill/twill-common/0.6.0-incubating/twill-common-0.6.0-incubating.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/twill-common-0.6.0-incubating.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/twill/twill-core/0.6.0-incubating/twill-core-0.6.0-incubating.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/twill-core-0.6.0-incubating.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/twill/twill-discovery-api/0.6.0-incubating/twill-discovery-api-0.6.0-incubating.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/twill-discovery-api-0.6.0-incubating.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/twill/twill-discovery-core/0.6.0-incubating/twill-discovery-core-0.6.0-incubating.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/twill-discovery-core-0.6.0-incubating.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/twill/twill-zookeeper/0.6.0-incubating/twill-zookeeper-0.6.0-incubating.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/twill-zookeeper-0.6.0-incubating.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/twill/twill-api/0.6.0-incubating/twill-api-0.6.0-incubating.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/twill-api-0.6.0-incubating.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/hive/hive-vector-code-gen/3.0.0/hive-vector-code-gen-3.0.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/hive-vector-code-gen-3.0.0.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/hive/hive-llap-tez/3.0.0/hive-llap-tez-3.0.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/hive-llap-tez-3.0.0.jar && \
-    curl https://repo1.maven.org/maven2/commons-httpclient/commons-httpclient/3.0.1/commons-httpclient-3.0.1.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/commons-httpclient-3.0.1.jar && \
-    curl https://repo1.maven.org/maven2/org/antlr/ST4/4.0.4/ST4-4.0.4.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/ST4-4.0.4.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/ivy/ivy/2.4.0/ivy-2.4.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/ivy-2.4.0.jar && \
-    curl https://repo1.maven.org/maven2/org/codehaus/groovy/groovy-all/2.4.11/groovy-all-2.4.11.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/groovy-all-2.4.11.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/calcite/calcite-core/1.16.0/calcite-core-1.16.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/calcite-core-1.16.0.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/calcite/avatica/avatica/1.11.0/avatica-1.11.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/avatica-1.11.0.jar && \
-    curl https://repo1.maven.org/maven2/stax/stax-api/1.0.1/stax-api-1.0.1.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/stax-api-1.0.1.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/velocity/velocity/1.5/velocity-1.5.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/velocity-1.5.jar && \
-    curl https://repo1.maven.org/maven2/oro/oro/2.0.8/oro-2.0.8.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/oro-2.0.8.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/hive/hive-llap-client/3.0.0/hive-llap-client-3.0.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/hive-llap-client-3.0.0.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/hive/hive-llap-common/3.0.0/hive-llap-common-3.0.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/hive-llap-common-3.0.0.jar && \
-    curl https://repo1.maven.org/maven2/org/apache/calcite/calcite-linq4j/1.16.0/calcite-linq4j-1.16.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/calcite-linq4j-1.16.0.jar && \
-    curl https://repo1.maven.org/maven2/com/esri/geometry/esri-geometry-api/2.0.0/esri-geometry-api-2.0.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/esri-geometry-api-2.0.0.jar && \
-    curl https://repo1.maven.org/maven2/com/google/code/findbugs/jsr305/3.0.1/jsr305-3.0.1.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/jsr305-3.0.1.jar && \
-    curl https://repo1.maven.org/maven2/com/yahoo/datasketches/sketches-core/0.9.0/sketches-core-0.9.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/sketches-core-0.9.0.jar && \
-    curl https://repo1.maven.org/maven2/org/codehaus/janino/janino/2.7.6/janino-2.7.6.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/janino-2.7.6.jar && \
-    curl https://repo1.maven.org/maven2/org/codehaus/janino/commons-compiler/2.7.6/commons-compiler-2.7.6.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/commons-compiler-2.7.6.jar && \
-    curl https://repo1.maven.org/maven2/com/yahoo/datasketches/memory/0.9.0/memory-0.9.0.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/memory-0.9.0.jar && \
-    curl https://repo1.maven.org/maven2/org/xerial/snappy/snappy-java/1.1.8.2/snappy-java-1.1.8.2.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/snappy-java-1.1.8.2.jar && \
-    curl https://repo1.maven.org/maven2/org/slf4j/slf4j-api/1.7.30/slf4j-api-1.7.30.jar \ 
-    --output ${SPARK_HOME}/hms-3.0.0/jars/slf4j-api-1.7.30.jar 
+COPY conf/hms-3.0.0-deps.txt ${SPARK_HOME}/hms-3.0.0/jars
+RUN cd $SPARK_HOME/hms-3.0.0/jars && xargs -n1 -P1 curl --remote-name < hms-3.0.0-deps.txt
 
 
-#+---------------------------------------------+
-#| Instalando SQL Magics para Trino e SparkSQL |
-#+---------------------------------------------+
+#+------------------------------------+
+#| Instalando NodeJS (para extensões) |
+#+------------------------------------+
 
+RUN apt-get install nodejs -y
 RUN apt-get install npm -y
-RUN npm list -g
+
+#+--------------------------------------------+
+#| Installing SQL Magics for Trino e SparkSQL |
+#+--------------------------------------------+
+
 RUN npm install -g sql-language-server
 
-RUN pip3 install jupyterlab-lsp jupyterlab-sql-editor trino pyspark dbt-core
-RUN pip3 uninstall dbt-core -y
-RUN pip3 install dbt-core==1.01
-RUN pip3 install bokeh
+RUN pip install jedi-language-server
+RUN pip install jupyterlab-lsp jupyterlab-sql-editor trino
+RUN pip install dbt-core==1.01
+RUN pip install bokeh
 
-#+----------------------------------------+
-#| Configurações Jupyter e spark-defaults |
-#+----------------------------------------+
+#+---------------------------------------------+
+#| Installing Jupyter Lab S3 Browser extension |
+#+---------------------------------------------+
+
+RUN pip install jupyterlab-s3-browser
+RUN jupyter serverextension enable --py jupyterlab_s3_browser
+ENV JUPYTERLAB_S3_ENDPOINT=http://minio:9000
+ENV JUPYTERLAB_S3_ACCESS_KEY_ID=admin
+ENV JUPYTERLAB_S3_SECRET_ACCESS_KEY=password
+
+#+----------------+
+#| Installing Git |
+#+----------------+
+
+RUN apt-get install git -y
+RUN pip install jupyterlab-git
+
+#+--------------------------------------------------+
+#| Creating Kernels for Hive and Open Table Formats |
+#+--------------------------------------------------+
+
+# Apache Hive
+
+# Create IPython profile
+RUN ipython profile create pyspark_hive
+# Create PySpark + Hive kernel based on IPython profile
+RUN python3 -m ipykernel install --user --name pyspark_hive --display-name "PySpark (Hive)" --profile pyspark_hive
+COPY kernels/hive/media/logo-svg.svg /root/.local/share/jupyter/kernels/pyspark_hive/
+# Copy startup Script
+COPY kernels/hive/conf/00_startup_pyspark_hive_kernel.py /root/.ipython/profile_pyspark_hive/startup/
+# Configure PySPark + Hive kernel
+COPY kernels/hive/conf/ipython_config.py /root/.ipython/profile_pyspark_hive/
+COPY kernels/hive/conf/ipython_kernel_config.py /root/.ipython/profile_pyspark_hive/
+
+# Apache Iceberg
+
+# Create IPython profile
+RUN ipython profile create pyspark_iceberg
+# Create PySpark + Iceberg kernel based on IPython profile
+RUN python3 -m ipykernel install --user --name pyspark_iceberg --display-name "PySpark (Iceberg)" --profile pyspark_iceberg
+COPY kernels/iceberg/media/logo-svg.svg /root/.local/share/jupyter/kernels/pyspark_iceberg/
+# Copy startup script
+COPY kernels/iceberg/conf/00_startup_pyspark_iceberg_kernel.py  /root/.ipython/profile_pyspark_iceberg/startup/
+# Configure PySPark + Hive kernel
+COPY kernels/iceberg/conf/ipython_config.py /root/.ipython/profile_pyspark_iceberg/
+COPY kernels/iceberg/conf/ipython_kernel_config.py /root/.ipython/profile_pyspark_iceberg/
+
+# Delta Lake
+
+# Create IPython profile
+RUN ipython profile create pyspark_delta
+# Create PySpark + Delta kernel based on IPython profile
+RUN python3 -m ipykernel install --user --name pyspark_delta --display-name "PySpark (Delta)" --profile pyspark_delta
+COPY kernels/delta/media/logo-svg.svg /root/.local/share/jupyter/kernels/pyspark_delta/
+# Copy startup script
+COPY kernels/delta/conf/00_startup_pyspark_delta_kernel.py  /root/.ipython/profile_pyspark_delta/startup/
+# Configure PySPark + Delta kernel
+COPY kernels/delta/conf/ipython_config.py /root/.ipython/profile_pyspark_delta/
+COPY kernels/delta/conf/ipython_kernel_config.py /root/.ipython/profile_pyspark_delta/
+
+#+-----------------------------------------------+
+#| Configurations for Jupyter and spark-defaults |
+#+-----------------------------------------------+
 
 COPY conf/jupyter_notebook_config.py /root/.jupyter/
-
 COPY conf/spark-defaults.conf ${SPARK_HOME}/conf/
-
 COPY conf/ipython_config.py /root/.ipython/profile_default/
+COPY conf/plugin.jupyterlab-settings /root/.jupyter/lab/user-settings/@jupyter-lsp/jupyterlab-lsp/
 
-# COPY conf/plugin.jupyterlab-settings /root/.jupyter/lab/user-settings/@jupyter-lsp/jupyterlab-lsp/
-
+RUN chmod -R 777 /usr/local/spark_dev/work
 USER root

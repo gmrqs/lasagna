@@ -1,11 +1,11 @@
 #+-----------------------------------------+
-#|           Imagem Spark 3.3.2            | 
+#|           Imagem Spark 3.4.1            | 
 #|                                         |
 #| O que decide se é Driver ou Worker      |
 #| é o comando de inicialização no compose |
 #+-----------------------------------------+
 
-FROM ubuntu:22.10
+FROM ubuntu:latest
 
 SHELL ["/bin/bash", "-c"]
 
@@ -32,11 +32,11 @@ ENV PATH "${JAVA_HOME}/bin:$PATH"
  #| Instalando Spark 3.3.2 |
  #+------------------------+
 
-RUN curl -O https://dlcdn.apache.org/spark/spark-3.3.2/spark-3.3.2-bin-hadoop3.tgz &&\
-    tar xvzf spark-3.3.2-bin-hadoop3.tgz -C /usr/local &&\
-    rm spark-3.3.2-bin-hadoop3.tgz &&\
+RUN curl -O https://dlcdn.apache.org/spark/spark-3.4.1/spark-3.4.1-bin-hadoop3.tgz &&\
+    tar xvzf spark-3.4.1-bin-hadoop3.tgz -C /usr/local &&\
+    rm spark-3.4.1-bin-hadoop3.tgz &&\
     cd /usr/local &&\
-    ln -sT spark-3.3.2-bin-hadoop3 spark
+    ln -sT spark-3.4.1-bin-hadoop3 spark
 
 RUN echo "export SPARK_HOME=/usr/local/spark" >> ~/.bashrc
 RUN echo "export PATH=\$SPARK_HOME/bin:\$PATH" >> ~/.bashrc
@@ -44,9 +44,9 @@ RUN echo "export PATH=\$SPARK_HOME/bin:\$PATH" >> ~/.bashrc
 ENV SPARK_HOME /usr/local/spark
 ENV PATH "${SPARK_HOME}/bin:$PATH" 
 
-#+---------------------------------------+
-#| Instalando dependências para S3/MinIO |
-#+---------------------------------------+
+#+----------------------------------+
+#| Instalando dependências S3/MinIO |
+#+----------------------------------+
 
 RUN curl https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.3.4/hadoop-aws-3.3.4.jar \
     --output ${SPARK_HOME}/jars/hadoop-aws-3.3.4.jar
@@ -56,5 +56,12 @@ RUN curl https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/1.12.2
 
 RUN curl https://jdbc.postgresql.org/download/postgresql-42.5.0.jar \
     --output ${SPARK_HOME}/jars/postgresql-42.5.0.jar
+    
+#+---------------------------------------------+
+#| Instalando dependências para Apache Iceberg |
+#+---------------------------------------------+
+
+#RUN curl https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-spark-runtime-3.2_2.13/1.3.0/iceberg-spark-runtime-3.2_2.13-1.3.0.jar \
+#    --output ${SPARK_HOME}/jars/iceberg-spark-runtime-3.2_2.13-1.3.0.jar
 
 USER root

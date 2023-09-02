@@ -9,13 +9,17 @@ Requisitos:
 
 Para utilizá-lo basta clonar o repositório e executar no diretório principal o comando:
 
-> docker compose up -d
+```bash
+docker compose up -d
+```
 
-<sub><sup>o docker vai buildar as imagens sozinho, recomendo uma conexão de internet boa e estável</sup></sub>
+<sub><sup>o docker vai buildar as imagens sozinho, recomendo uma conexão de internet estável</sup></sub>
 
-Acesse os logs do workspace para obter o link do Jupyter Lab.
+Utilize o comando abaixo para obter o link do Jupyter Lab.
 
-> docker logs pyspark-dev-env-workspace-1
+```bash
+ docker logs workspace 2>&1 | grep http://127.0.0.1
+```
 
 <sub><sup>(se preferir pode ver nos logs do Docker Desktop também)</sup></sub>
 
@@ -23,22 +27,27 @@ Clique no link _http://127.0.0.1:8888/lab?token=<token_gigante_super_seguro>_
 
 Para iniciar o broker kafka você deve ir até o diretório kafka desse repositório e executar:
 
-> docker compose up -d
+```bash
+docker compose up -d
+```
 
 ### O que é criado?
 
 ![alt text](drawio/analytics-lab.png "Title")
 
-Os templates docker-compose.yml criam uma série de containers, entre eles:
+Os template `docker-compose.yml` criam uma série de containers, entre eles:
 
 #### Workspace
 Um cliente Jupyter Lab para sessões de desenvolvimento interativo com:
 + Diretório _work_ para persistir scripts e notebooks criados;
-<sub><sup>(e ainda tem uns scripts que usei pra testar as funcionalidades incluindo um producer kafka para gerar eventos aleatórios!)</sup></sub>
-+ spark-defaults.conf para facilitar configuração das SparkSessions no cluster;
-<sub><sup>(criar a spark session nunca foi tão fácil!)</sup></sub>
-+ Extensão jupyter_sql_editor instalada para utilização dos comandos magic %sparksql e %trino 
-<sub><sup>(ainda meio instável e sem auto-completion mas funciona, juro!)</sup></sub>
++ Configuração spark-defaults.conf para facilitar configuração das SparkSessions no cluster;
++ Kernels dedicados para PySpark com Hive, Iceberg ou Delta
+
+> :warning: Utilize o magic `%SparkSession` para configurar a Spark Session
+
+![alt text](drawio/kernels.gif "Title")
++ Extensão [jupyter_sql_editor](https://github.com/CybercentreCanada/jupyterlab-sql-editor) instalada para execução de SQL diretamente do notebook usando dos comandos magic `%sparksql` e `%trino` 
++ Extensão [jupyterlab_s3_browser](https://github.com/IBM/jupyterlab-s3-browser) para acessar os buckets MinIO direto do Jupyter Lab
 
 #### MinIO
 Uma instância do MinIO, serviço de object storage que emula o funcionamento de um S3 com:
@@ -60,8 +69,8 @@ Uma instância do Hive Standalone Metastore utilizando PostgreSQL no back-end pa
 + Comunicação com o PostgresSQL através de JDBC na porta 5432
 
 #### Trino
-Uma instancia unica de Trino para servir de motor de query. Já integrado com Hive Metastore e MinIO
-+ Catálogo _Hive_ já configurado. Toda tabela criada via PySpark será acessível no Trino
+Uma instância unica de Trino para servir de motor de query. Já integrado com Hive Metastore e MinIO
++ Catálogos Hive, Delta e Iceberg já configurados. Toda tabela criada via PySpark será acessível no Trino
 + Serviço disponível na porta padrão 8080
 
 #### Kafka
