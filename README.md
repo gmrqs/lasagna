@@ -1,80 +1,82 @@
-![alt text](drawio/pastabricks-2.png "Title")
-Ou pastabricks, se preferir, é um ambiente de desenvolvimento interativo que criei para praticar PySpark
+![alt text](docs/pastabricks-2.png "Lasagna")
+Lasagna (or _pastabricks_) is a interactive development environment I built to learn and practice PySpark.
 
-Montado utilizando Docker Compose ele estrutura um Jupyter Lab, Cluster Spark, MinIO object storage, Hive Metastore, Trino e de quebra vem um Kafka pra simular eventos/streaming.
+It's built using Docker Compose template, provisioning a Jupyter Lab, a two-workers Spark Standalone Cluster, MinIO Object Storage, a Hive Standalone Metastore, Trino and a Kafka cluster for simulating events. 
 
-Requisitos:
+Requisites:
 - Docker Desktop
 - Docker Compose
 
-Para utilizá-lo basta clonar o repositório e executar no diretório principal o comando:
+To use it you just have to clone this repository and execute the following:
 
 ```bash
 docker compose up -d
 ```
 
-<sub><sup>o docker vai buildar as imagens sozinho, recomendo uma conexão de internet estável</sup></sub>
+<sub><sup>Docker will build the images by itself. I recommend having a wired internet connection for this</sup></sub>
 
-Utilize o comando abaixo para obter o link do Jupyter Lab.
+After all container are up and running, execute the following to get Jupyter Lab access link: 
 
 ```bash
  docker logs workspace 2>&1 | grep http://127.0.0.1
 ```
 
-<sub><sup>(se preferir pode ver nos logs do Docker Desktop também)</sup></sub>
+<sub><sup>(you can also the the link in docker desktop logs)</sup></sub>
 
 Clique no link _http://127.0.0.1:8888/lab?token=<token_gigante_super_seguro>_
 
-Para iniciar o broker kafka você deve ir até o diretório kafka desse repositório e executar:
+To start the Kafka broker you need to go to the kafka folder and execute the following:
 
 ```bash
 docker compose up -d
 ```
 
-### O que é criado?
+### What does Lasagna creates?
 
-![alt text](drawio/analytics-lab.png "Title")
+![alt text](docs/analytics-lab.png "Title")
 
-Os template `docker-compose.yml` criam uma série de containers, entre eles:
+The `docker-compose.yml` template create a series of containers:
 
-#### Workspace
-Um cliente Jupyter Lab para sessões de desenvolvimento interativo com:
-+ Diretório _work_ para persistir scripts e notebooks criados;
-+ Configuração spark-defaults.conf para facilitar configuração das SparkSessions no cluster;
-+ Kernels dedicados para PySpark com Hive, Iceberg ou Delta
+#### :orange_book: Workspace
+A Jupyter Lab client for interactive development sessions, featuring:
++ A _work_ directory in order to persists your scripts and notebooks;
++ `spark-defaults.conf` pre-configured to make Spark Sessions easier to create;
++ Dedicated kernels for PySpark with Hive, Iceberg or Delta;
 
-> :warning: Utilize o magic `%SparkSession` para configurar a Spark Session
+> :eyes: Use `%SparkSession` command to easily configure Spark Session
 
-![alt text](drawio/kernels.gif "Title")
-+ Extensão [jupyter_sql_editor](https://github.com/CybercentreCanada/jupyterlab-sql-editor) instalada para execução de SQL diretamente do notebook usando dos comandos magic `%sparksql` e `%trino` 
-+ Extensão [jupyterlab_s3_browser](https://github.com/IBM/jupyterlab-s3-browser) para acessar os buckets MinIO direto do Jupyter Lab
+![alt text](docs/kernels.gif "Title")
++ [jupyter_sql_editor](https://github.com/CybercentreCanada/jupyterlab-sql-editor) extension for SQL execution with `%sparksql` and `%trino` magic commands;
++ [jupyterlab_s3_browser](https://github.com/IBM/jupyterlab-s3-browser) extension to easily browse MinIO S3 buckets;
 
-#### MinIO
-Uma instância do MinIO, serviço de object storage que emula o funcionamento de um S3 com:
-+ Interface web acessivel em localhost:9090
-+ API para protocolo s3a na porta 9000
-+ Diretório _mount/minio_ e _mount/minio-config_ para persistir dados entre sessões
+#### :open_file_folder: MinIO Object Storage
+A single MinIO instance to serve as object storage:
++ Web UI accessible at localhost:9090 (user: `admin` password: `password`)
++ s3a protocol API available at port 9000;
++ _mount/minio_ and _mount/minio-config_ directories mounted to persist data between sessions.
 
-#### Standalone Spark Cluster
-Um cluster Spark para processamento dos workloads contendo:
-+ 1 Master node (master na porta 7077, web-ui em localhost:5050)
-+ 2 Worker node (web-ui em localhost:5051 e localhost:5052)
-+ Dependências necessárias para conexão com o MinIO já instaladas nas imagens
-+ Comunicação com MinIO através da porta 9000
+#### :sparkles: Spark Cluster
+A standalone spark cluster for workload processing:
++ 1 Master node (master at port 7077, web-ui at localhost:5050)
++ 2 Worker nodes (web-ui at localhost:5051 and localhost:5052)
++ All the necessary dependencies for MinIO connection;
++ Connectivity with MinIO @ port 9000.
 
-#### Hive Standalone Metastore
-Uma instância do Hive Standalone Metastore utilizando PostgreSQL no back-end para permitir a persistencia de metadados.
-+ Diretório _mount/postgres_ para persistir tabelas entre sessões de desenvolvimento
-+ Comunicação com o cluster Spark através do Thrift na porta 9083
-+ Comunicação com o PostgresSQL através de JDBC na porta 5432
+#### :honeybee: Hive Standalone Metastore
+A Hive Standalone Metastore instance using PostgreSQL as back-end database allowinto to persist table metadata between sessions.
++ _mount/postgres_ directory to persist tables between development sessions;
++ Connectivity with Spark cluster at through  thift protocol at port 9083;
++ Connectivity with PostgresSQL through JDBC at port 5432.
 
-#### Trino
-Uma instância unica de Trino para servir de motor de query. Já integrado com Hive Metastore e MinIO
-+ Catálogos Hive, Delta e Iceberg já configurados. Toda tabela criada via PySpark será acessível no Trino
-+ Serviço disponível na porta padrão 8080
+#### :rabbit: Trino
+A single Trino instace to serve as query engine.
++ Hive, Delta e Iceberg catalos configured. All tables created in using PySpark are accessible with Trino;
++ Standar service available at port 8080.
 
-#### Kafka
-Docker compose de uma instancia zookeper + single-node de kafka para criação de um stream de dados fictício com um producer em Python.
-+ Utiliza a mesma network criado pelo compose do PySpark.
-+ Script de kafka-producer disponível utilizando Faker para gerar eventos aleatórios no kafka
-+ Acessivel através do kafka:29092
+> :eyes: Don't forget you can use the `%trino` magic command in your notebooks!
+
+#### :ocean: Kafka
+A separate docker compose template with a zookeper + kafka single-node instance to mock data-streams with a python producer.
++ Uses the same network as the lasagna docker compose creates;
++ A kafka-producer notebook/script is available to create random events with Faker library;
++ Accessible at kafka:29092.
