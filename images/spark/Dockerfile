@@ -1,5 +1,5 @@
 #+-----------------------------------------+
-#|           Imagem Spark 3.4.1            | 
+#|           Imagem Spark 3.5.0            | 
 #|                                         |
 #| O que decide se é Driver ou Worker      |
 #| é o comando de inicialização no compose |
@@ -32,11 +32,11 @@ ENV PATH "${JAVA_HOME}/bin:$PATH"
  #| Instalando Spark 3.3.2 |
  #+------------------------+
 
-RUN curl -O https://dlcdn.apache.org/spark/spark-3.4.1/spark-3.4.1-bin-hadoop3.tgz &&\
-    tar xvzf spark-3.4.1-bin-hadoop3.tgz -C /usr/local &&\
-    rm spark-3.4.1-bin-hadoop3.tgz &&\
+RUN curl -O https://dlcdn.apache.org/spark/spark-3.5.0/spark-3.5.0-bin-hadoop3.tgz &&\
+    tar zxvf spark-3.5.0-bin-hadoop3.tgz -C /usr/local &&\
+    rm spark-3.5.0-bin-hadoop3.tgz &&\
     cd /usr/local &&\
-    ln -sT spark-3.4.1-bin-hadoop3 spark
+    ln -sT spark-3.5.0-bin-hadoop3 spark
 
 RUN echo "export SPARK_HOME=/usr/local/spark" >> ~/.bashrc
 RUN echo "export PATH=\$SPARK_HOME/bin:\$PATH" >> ~/.bashrc

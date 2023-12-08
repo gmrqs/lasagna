@@ -84,7 +84,7 @@ RUN pip install bokeh
 #+---------------------------------------------+
 
 RUN pip install jupyterlab-s3-browser
-RUN jupyter serverextension enable --py jupyterlab_s3_browser
+#RUN jupyter serverextension enable --py jupyterlab_s3_browser
 ENV JUPYTERLAB_S3_ENDPOINT=http://minio:9000
 ENV JUPYTERLAB_S3_ACCESS_KEY_ID=admin
 ENV JUPYTERLAB_S3_SECRET_ACCESS_KEY=password
