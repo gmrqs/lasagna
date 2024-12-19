@@ -97,7 +97,7 @@ services:
     environment:
       - MINIO_ROOT_USER=admin
       - MINIO_ROOT_PASSWORD=password
-    command: jupyter lab --port 8888
+    command: jupyter lab --port 8888 --LabApp.token=''
   trino:
     container_name: trino
     build: ./images/trino
@@ -110,7 +110,6 @@ services:
     environment:
       - MINIO_ROOT_USER=admin
       - MINIO_ROOT_PASSWORD=password
-      
 networks:
   my_network:
     driver: bridge

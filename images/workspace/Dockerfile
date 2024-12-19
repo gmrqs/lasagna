@@ -1,8 +1,9 @@
 FROM ubuntu:22.04
 
 SHELL ["/bin/bash", "-c"]
+RUN apt update
 RUN apt-get update --fix-missing
-RUN apt-get install openjdk-11-jdk -y  
+RUN apt-get install openjdk-18-jdk -y  
 
 #+-----------------+
 #| Installing cURL |
@@ -11,10 +12,11 @@ RUN apt-get install openjdk-11-jdk -y
 RUN apt-get install curl -y
 
 #+------------------------+
-#| Installing Python pip3 |
+#| Installing Python pip |
 #+------------------------+
 
-RUN apt-get install python3-pip -y --fix-missing
+RUN apt-get install python3-pip -y
+RUN pip install --upgrade pip
 
 #+-----------------------+
 #| Installing JupyterLab |
@@ -26,7 +28,7 @@ RUN pip install jupyterlab
 #| Installing PySpark |
 #+--------------------+
 
-RUN pip install pyspark==3.4.1
+RUN pip install pyspark==3.5.3
 
 ENV SPARK_HOME=/usr/local/lib/python3.10/dist-packages/pyspark
 

@@ -32,7 +32,7 @@ spark"""
 spark = SparkSession \\
     .builder \\
     .appName("SparkSession-Iceberg") \\
-    .config("spark.jars.packages", "org.apache.iceberg:iceberg-spark-runtime-3.2_2.12:1.3.0") \\
+    .config("spark.jars.packages", "org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.7.0") \\
     .config("spark.sql.extensions", "org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions") \\
     .config("spark.sql.catalog.iceberg", "org.apache.iceberg.spark.SparkCatalog") \\
     .config("spark.sql.catalog.iceberg.type", "hive") \\

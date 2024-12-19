@@ -1,5 +1,5 @@
 mount/
-work/projetos/
-work/estudos/
-work/utils/
-work/testes/
+work/projects/olist
+work/projects/pokedex
+# ignore all projects except iceberg_wap
+!iceberg_wap/
